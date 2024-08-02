@@ -1,0 +1,72 @@
+name: CI/CD Workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'adopt'
+        java-version: '17'
+
+    - name: Set up Maven
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'maven'
+        maven-version: '3.8.4'
+
+    - name: Install dependencies
+      run: mvn install -DskipTests
+
+    - name: Google Java Formatter Check
+      run: mvn com.spotify.fmt:fmt-maven-plugin:check
+
+    - name: SonarQube Scan
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: mvn sonar:sonar -Dsonar.projectKey=your_project_key -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+
+    - name: OWASP Check
+      run: mvn org.owasp:dependency-check-maven:check
+
+    - name: OSS Check
+      run: mvn ossindex:audit
+
+    - name: GitLeaks Scan
+      uses: zricethezav/gitleaks-action@v1.3.0
+      with:
+        args: --path=.
+
+    - name: Pivotal License Finder
+      run: |
+        curl -sSL https://raw.githubusercontent.com/pivotal/LicenseFinder/master/ci/lf-bootstrap.sh | bash
+        license_finder
+
+    - name: Build Docker image
+      run: mvn docker:build
+
+    - name: Trivy Docker Scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'dnyanyog.org/${{ github.event.repository.name }}:latest'
+
+    - name: Push Docker image to GitHub Packages
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        docker tag dnyanyog.org/${{ github.event.repository.name }}:latest ghcr.io/${{ github.repository }}:latest
+        docker push ghcr.io/${{ github.repository }}:latest
+
