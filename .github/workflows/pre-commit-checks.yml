@@ -32,3 +32,20 @@ jobs:
       uses: zricethezav/gitleaks-action@v1.3.0
       with:
         args: --path=.
+
+    - name: SonarQube Scan
+      if: false 
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: mvn sonar:sonar -Dsonar.projectKey=your_project_key -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+      continue-on-error: true
+
+    - name: OWASP Check
+      if: false 
+      run: mvn org.owasp:dependency-check-maven:check
+      continue-on-error: true
+
+    - name: OSS Check
+      if: false 
+      run: mvn ossindex:audit
+      continue-on-error: true
