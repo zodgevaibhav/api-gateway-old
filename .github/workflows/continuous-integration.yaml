@@ -47,13 +47,13 @@ jobs:
       run: mvn ossindex:audit
       continue-on-error: true
 
-    - run: mvn clean install docker:build -Ddocker.registry=${{secrets.DOCKER_REGISTRY_USER}}
+    - run: mvn clean install docker:build -Ddocker.registry=${{env.DOCKER_REGISTRY}}
 
     - name: Tag Docker image
       if: false
       run: |
         REPO_NAME=$(basename $(pwd))
-        docker tag dnyanyog.org/$REPO_NAME:latest ${{secrets.DOCKER_REGISTRY_USER}}/$REPO_NAME:$GITHUB_REF_NAME
+        docker tag dnyanyog.org/$REPO_NAME:latest ${{secrets.DOCKER_REGISTRY}}/$REPO_NAME:$GITHUB_REF_NAME
         docker images  
 
     - name: Cache Maven dependencies
