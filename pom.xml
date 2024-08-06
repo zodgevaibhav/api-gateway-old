@@ -71,7 +71,7 @@
 				<configuration>
 					<images>
 						<image>
-							<name>${docker.registry}/${project.artifactId}:latest</name>
+							<name>${image.registry}/${project.artifactId}:latest</name>
 							<build>
 								<dockerFile>${project.basedir}/dockerfile</dockerFile>
 								<args>
