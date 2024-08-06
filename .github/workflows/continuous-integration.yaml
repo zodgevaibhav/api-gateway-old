@@ -47,7 +47,7 @@ jobs:
       run: mvn ossindex:audit
       continue-on-error: true
 
-    - run: mvn clean install docker:build -Ddocker.registry=${{vars.DOCKER_REGISTRY}}
+    - run: mvn clean install docker:build -Ddocker.registry=${{vars.DOCKER_REGISTRY}}/${{secrets.DOCKER_REGISTRY}}
 
     - name: Tag Docker image
       if: false
