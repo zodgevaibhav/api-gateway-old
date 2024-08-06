@@ -22,6 +22,9 @@ jobs:
         java-version: '21'
         cache: 'maven'
 
+    - name: Install dependencies
+      run: mvn install -DskipTests
+
     - name: Google Java Formatter Check
       run: mvn com.spotify.fmt:fmt-maven-plugin:check
 
@@ -47,15 +50,12 @@ jobs:
       run: mvn ossindex:audit
       continue-on-error: true
 
-    - run: mvn clean install docker:build -Ddocker.registry=${{secrets.DOCKER_REGISTRY_USER}}
-
+    - run: mvn clean install docker:build
     - name: Tag Docker image
-      if: false
       run: |
         REPO_NAME=$(basename $(pwd))
         docker tag dnyanyog.org/$REPO_NAME:latest ${{secrets.DOCKER_REGISTRY_USER}}/$REPO_NAME:$GITHUB_REF_NAME
-        docker images  
-
+        docker images          
     - name: Cache Maven dependencies
       uses: actions/cache@v3
       with:
@@ -69,7 +69,6 @@ jobs:
       with:
         username: ${{ secrets.DOCKER_REGISTRY_USER }}
         password: ${{ secrets.GH_TOKEN }} 
-        
     - name: Push Docker image to GitHub Packages
       run: |
         REPO_NAME=$(basename $(pwd))
