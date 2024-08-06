@@ -7,6 +7,7 @@
 	<properties>
 		<maven.compiler.target>17</maven.compiler.target>
 		<maven.compiler.source>17</maven.compiler.source>
+		<docker.registry>dnyanyog.org</docker.registry>
 	</properties>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -70,7 +71,7 @@
 				<configuration>
 					<images>
 						<image>
-							<name>dnyanyog.org/${project.artifactId}:latest</name>
+							<name>${docker.registry}/${project.artifactId}:latest</name>
 							<build>
 								<dockerFile>${project.basedir}/dockerfile</dockerFile>
 								<args>
